@@ -283,3 +283,93 @@ resource "aws_security_group" "devopspro_lab_sg_db" {
     Name = "devopspro-lab-sg-db"
   }
 }
+
+
+resource "aws_network_acl" "devopspro_lab_network_acl_private" {
+  vpc_id     = aws_vpc.devopspro_lab_vpc.id
+  subnet_ids = [aws_subnet.devopspro_lab_subnet_private.id]
+
+  # Porta MongoDB
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 27017
+    to_port    = 27017
+  }
+
+  # Porta SSH
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  # Portas Efemeras
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 120
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 1024
+    to_port    = 65535
+  }
+
+  # Portas Efemeras
+  egress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 1024
+    to_port    = 65535
+  }
+
+  # Portas HTTP
+  egress {
+    protocol   = "tcp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 80
+    to_port    = 80
+  }
+
+  # Portas HTTPs
+  egress {
+    protocol   = "tcp"
+    rule_no    = 120
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 443
+    to_port    = 443
+  }
+
+  # Portas DNS (tcp)
+  egress {
+    protocol   = "tcp"
+    rule_no    = 130
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 53
+    to_port    = 53
+  }
+
+  # Portas DNS (udp)
+  egress {
+    protocol   = "udp"
+    rule_no    = 140
+    action     = "allow"
+    cidr_block = "0.0.0./0"
+    from_port  = 53
+    to_port    = 53
+  }
+
+  tags = {
+    Name = "devopspro-lab-network-acl-private"
+  }
+}
