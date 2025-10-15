@@ -1,8 +1,16 @@
+# 
+# Variáveis do Projeto
+# 
+
 variable "project_region" {
   type        = string
   default     = "us-east-1"
   description = "Região utilizada no projeto"
 }
+
+# 
+# Variáveis da VPC 
+# 
 
 variable "project_vpc_name" {
   type        = string
@@ -68,4 +76,50 @@ variable "project_rt_private_name" {
   type        = string
   default     = "devopspro-lab-rt-private"
   description = "Nome do Route Table Privada"
+}
+
+# 
+# Variáveis das EC2 
+# 
+
+variable "ec2_ami" {
+  type        = string
+  default     = "ami-053b0d53c279acc90"
+  description = "ID da imagem Amazon"
+}
+
+variable "web_ec2_name" {
+  type        = string
+  default     = "web-ec2"
+  description = "ID da imagem Amazon"
+}
+
+variable "web_ec2_instance_type" {
+  type        = string
+  default     = "t2.micro"
+  description = "ID da imagem Amazon"
+}
+
+variable "db_ec2_name" {
+  type        = string
+  default     = "db-ec2"
+  description = "ID da imagem Amazon"
+}
+
+variable "db_ec2_instance_type" {
+  type        = string
+  default     = "t2.micro"
+  description = "ID da imagem Amazon"
+}
+
+variable "key_pair_ssh_name" {
+  type        = string
+  default     = "devopspro-labs-key"
+  description = "ID da imagem Amazon"
+}
+
+variable "key_pair_ssh_file" {
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+  description = "ID da imagem Amazon"
 }
