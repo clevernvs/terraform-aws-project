@@ -1,32 +1,32 @@
 resource "aws_vpc" "devopspro_lab_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.project_vpc_cidr_block
 
   tags = {
-    Name = "devopspro-lab-vpc"
+    Name = var.project_vpc_name
   }
 }
 
 resource "aws_subnet" "devopspro_lab_subnet_public" {
   vpc_id     = aws_vpc.devopspro_lab_vpc.id
-  cidr_block = "10.0.0.0/24"
+  cidr_block = var.project_subnet_public_cidr_block
 
   tags = {
-    Name = "devopspro-lab-subnet-public"
+    Name = var.project_subnet_public_name
   }
 }
 
 resource "aws_subnet" "devopspro_lab_subnet_private" {
   vpc_id     = aws_vpc.devopspro_lab_vpc.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = var.project_subnet_private_cidr_block
 
   tags = {
-    Name = "devopspro-lab-subnet-private"
+    Name = var.project_subnet_private_name
   }
 }
 
 resource "aws_internet_gateway" "devopspro_lab_igw" {
   tags = {
-    Name = "devopspro-lab-igw"
+    Name = var.project_internet_gateway_name
   }
 }
 
@@ -39,7 +39,7 @@ resource "aws_eip" "devopspro_lab_nat_eip" {
   depends_on = [aws_internet_gateway.devopspro_lab_igw]
 
   tags = {
-    Name = "devopspro-lab-nat-eip"
+    Name = var.project_nat_eip_name
   }
 }
 
@@ -48,7 +48,7 @@ resource "aws_nat_gateway" "devopspro_lab_nat_gtw" {
   subnet_id     = aws_subnet.devopspro_lab_subnet_public.id
 
   tags = {
-    Name = "devopspro-lab-nat-gtw"
+    Name = var.project_nat_gtw_name
   }
 
   depends_on = [aws_internet_gateway.devopspro_lab_igw]
@@ -63,7 +63,7 @@ resource "aws_route_table" "devopspro_lab_rt_public" {
   }
 
   tags = {
-    Name = "devopspro-lab-rt-public"
+    Name = var.project_rt_public_name
   }
 }
 
@@ -81,7 +81,7 @@ resource "aws_route_table" "devopspro_lab_rt_private" {
   }
 
   tags = {
-    Name = "devopspro-lab-rt-private"
+    Name = var.project_rt_private_name
   }
 }
 

@@ -89,6 +89,7 @@ resource "aws_security_group" "devopspro_lab_sg_web" {
   }
 }
 
+
 resource "aws_network_acl" "devopspro_lab_network_acl_public" {
   vpc_id     = aws_vpc.devopspro_lab_vpc.id
   subnet_ids = [aws_subnet.devopspro_lab_subnet_public.id]
@@ -212,7 +213,6 @@ resource "aws_network_acl" "devopspro_lab_network_acl_public" {
     from_port  = 22
     to_port    = 22
   }
-
 
   tags = {
     Name = "devopspro-lab-network-acl-public"
