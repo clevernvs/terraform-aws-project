@@ -1,91 +1,36 @@
 resource "aws_security_group" "devopspro_lab_sg_web" {
-  name        = "devopspro-lab-sg-web"
+  name        = var.security_group_web_name
   description = "Regras de firewall para as EC2 para aplicacao Web"
   vpc_id      = aws_vpc.devopspro_lab_vpc.id
 
-  ingress {
-    description      = "Acesso HTTP"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  dynamic "ingress" {
+    for_each = var.security_group_web_ingresses
+    content {
+      description      = ingress.value["description"]
+      from_port        = ingress.value["from_port"]
+      to_port          = ingress.value["to_port"]
+      protocol         = ingress.value["protocol"]
+      cidr_blocks      = ingress.value["cidr_blocks"]
+      ipv6_cidr_blocks = ingress.value["ipv6_cidr_blocks"]
+
+    }
   }
 
-  ingress {
-    description      = "Acesso HTTPs"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
+  dynamic "egress" {
+    for_each = var.security_group_web_egresses
+    content {
+      description      = egress.value["description"]
+      from_port        = egress.value["from_port"]
+      to_port          = egress.value["to_port"]
+      protocol         = egress.value["protocol"]
+      cidr_blocks      = egress.value["cidr_blocks"]
+      ipv6_cidr_blocks = egress.value["ipv6_cidr_blocks"]
 
-  ingress {
-    description      = "Acesso SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso HTTP"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso HTTPs"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "udp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso MongoDB"
-    from_port        = 27017
-    to_port          = 27017
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    }
   }
 
   tags = {
-    Name = "devopspro-lab-sg-web"
+    Name = var.security_group_web_name
   }
 }
 
@@ -94,128 +39,34 @@ resource "aws_network_acl" "devopspro_lab_network_acl_public" {
   vpc_id     = aws_vpc.devopspro_lab_vpc.id
   subnet_ids = [aws_subnet.devopspro_lab_subnet_public.id]
 
-  # Portas HTTP
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 80
-    to_port    = 80
+  dynamic "ingress" {
+    for_each = var.network_acl_public_ingresses
+    content {
+      protocol   = ingress.value["protocol"]
+      rule_no    = ingress.value["rule_no"]
+      action     = ingress.value["action"]
+      cidr_block = ingress.value["cidr_block"]
+      from_port  = ingress.value["from_port"]
+      to_port    = ingress.value["to_port"]
+
+    }
   }
 
-  # Portas HTTPs
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 443
-    to_port    = 443
-  }
+  dynamic "egress" {
+    for_each = var.network_acl_public_egresses
+    content {
+      protocol   = egress.value["protocol"]
+      rule_no    = egress.value["rule_no"]
+      action     = egress.value["action"]
+      cidr_block = egress.value["cidr_block"]
+      from_port  = egress.value["from_port"]
+      to_port    = egress.value["to_port"]
 
-  # Portas SSH
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 120
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 22
-    to_port    = 22
-  }
-
-  # Portas Efemeras
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 130
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 1024
-    to_port    = 65535
-  }
-
-  # Portas DNS (tcp)
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 140
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  # Portas DNS (udp)
-  ingress {
-    protocol   = "udp"
-    rule_no    = 150
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  # Portas Efemeras
-  egress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 1024
-    to_port    = 65535
-  }
-
-  # Portas HTTP
-  egress {
-    protocol   = "tcp"
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 80
-    to_port    = 80
-  }
-
-  # Portas HTTPs
-  egress {
-    protocol   = "tcp"
-    rule_no    = 120
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 443
-    to_port    = 443
-  }
-
-  # Portas DNS
-  egress {
-    protocol   = "tcp"
-    rule_no    = 130
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  # Portas DNS
-  egress {
-    protocol   = "udp"
-    rule_no    = 140
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  # Portas SSH
-  egress {
-    protocol   = "tcp"
-    rule_no    = 150
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 22
-    to_port    = 22
+    }
   }
 
   tags = {
-    Name = "devopspro-lab-network-acl-public"
+    Name = var.network_acl_public_name
   }
 }
 
@@ -243,44 +94,20 @@ resource "aws_security_group" "devopspro_lab_sg_db" {
     cidr_blocks = [aws_vpc.devopspro_lab_vpc.cidr_block]
   }
 
-  egress {
-    description      = "Acesso HTTP"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso HTTPs"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Acesso DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "udp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  dynamic "egress" {
+    for_each = var.security_group_db_egresses
+    content {
+      description      = egress.value["description"]
+      from_port        = egress.value["from_port"]
+      to_port          = egress.value["to_port"]
+      protocol         = egress.value["protocol"]
+      cidr_blocks      = egress.value["cidr_blocks"]
+      ipv6_cidr_blocks = egress.value["ipv6_cidr_blocks"]
+    }
   }
 
   tags = {
-    Name = "devopspro-lab-sg-db"
+    Name = var.security_group_db_name
   }
 }
 
@@ -289,87 +116,31 @@ resource "aws_network_acl" "devopspro_lab_network_acl_private" {
   vpc_id     = aws_vpc.devopspro_lab_vpc.id
   subnet_ids = [aws_subnet.devopspro_lab_subnet_private.id]
 
-  # Porta MongoDB
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 27017
-    to_port    = 27017
+  dynamic "ingress" {
+    for_each = var.network_acl_private_ingresses
+    content {
+      protocol   = ingress.value["protocol"]
+      rule_no    = ingress.value["rule_no"]
+      action     = ingress.value["action"]
+      cidr_block = ingress.value["cidr_block"]
+      from_port  = ingress.value["from_port"]
+      to_port    = ingress.value["to_port"]
+    }
   }
 
-  # Porta SSH
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 22
-    to_port    = 22
-  }
-
-  # Portas Efemeras
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 120
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 1024
-    to_port    = 65535
-  }
-
-  # Portas Efemeras
-  egress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 1024
-    to_port    = 65535
-  }
-
-  # Portas HTTP
-  egress {
-    protocol   = "tcp"
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 80
-    to_port    = 80
-  }
-
-  # Portas HTTPs
-  egress {
-    protocol   = "tcp"
-    rule_no    = 120
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 443
-    to_port    = 443
-  }
-
-  # Portas DNS (tcp)
-  egress {
-    protocol   = "tcp"
-    rule_no    = 130
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  # Portas DNS (udp)
-  egress {
-    protocol   = "udp"
-    rule_no    = 140
-    action     = "allow"
-    cidr_block = "0.0.0./0"
-    from_port  = 53
-    to_port    = 53
+  dynamic "egress" {
+    for_each = var.network_acl_private_egresses
+    content {
+      protocol   = egress.value["protocol"]
+      rule_no    = egress.value["rule_no"]
+      action     = egress.value["action"]
+      cidr_block = egress.value["cidr_block"]
+      from_port  = egress.value["from_port"]
+      to_port    = egress.value["to_port"]
+    }
   }
 
   tags = {
-    Name = "devopspro-lab-network-acl-private"
+    Name = var.network_acl_private_name
   }
 }
